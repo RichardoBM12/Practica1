@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -22,6 +23,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.practica1.R;
 import com.example.practica1.ui.login.LoginViewModel;
 import com.example.practica1.ui.login.LoginViewModelFactory;
@@ -29,12 +36,19 @@ import com.example.practica1.ui.login.LoginViewModelFactory;
 public class LoginActivity extends AppCompatActivity {
 
     private LoginViewModel loginViewModel;
-    RequestQueue queque;
+    String url = "https://www.lamarr.com.mx/webservice2.php?";
+    TextView textView;
+    RequestQueue queue;
+    StringRequest stringRequest;
+    //https://www.lamarr.com.mx/webservice2.php?email=ciencias@ciencias.unam.mx&password=1234
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        textView = (TextView) findViewById(R.id.text);
+        queue = Volley.newRequestQueue(this);
+
         loginViewModel = ViewModelProviders.of(this, new LoginViewModelFactory())
                 .get(LoginViewModel.class);
 
@@ -71,11 +85,12 @@ public class LoginActivity extends AppCompatActivity {
                     showLoginFailed(loginResult.getError());
                 }
                 if (loginResult.getSuccess() != null) {
-                    updateUiWithUser(loginResult.getSuccess());
+                    //updateUiWithUser(loginResult.getSuccess());
                 }
                 setResult(Activity.RESULT_OK);
 
                 //Complete and destroy login activity once successful
+
                 finish();
             }
         });
@@ -106,6 +121,7 @@ public class LoginActivity extends AppCompatActivity {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     loginViewModel.login(usernameEditText.getText().toString(),
                             passwordEditText.getText().toString());
+
                 }
                 return false;
             }
@@ -117,6 +133,22 @@ public class LoginActivity extends AppCompatActivity {
                 loadingProgressBar.setVisibility(View.VISIBLE);
                 loginViewModel.login(usernameEditText.getText().toString(),
                         passwordEditText.getText().toString());
+                url = url + "email=" + usernameEditText.getText().toString() + "&password=" + passwordEditText.getText().toString();
+                stringRequest = new StringRequest(Request.Method.GET, url,
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                textView.setText(response.toString());
+                                Toast.makeText(getApplicationContext(), response, Toast.LENGTH_LONG).show();
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d("error",error.toString());
+                    }
+                });
+                queue.add(stringRequest);
+
             }
         });
         closeButton.setOnClickListener(new View.OnClickListener() {

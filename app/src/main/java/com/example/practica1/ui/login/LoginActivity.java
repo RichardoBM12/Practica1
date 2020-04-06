@@ -5,6 +5,7 @@ import android.app.Activity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -37,6 +38,8 @@ public class LoginActivity extends AppCompatActivity {
 
     private LoginViewModel loginViewModel;
     String url = "https://www.lamarr.com.mx/webservice2.php?";
+    public static final String RESPONSE = "";
+    String res;
     TextView textView;
     RequestQueue queue;
     StringRequest stringRequest;
@@ -91,7 +94,7 @@ public class LoginActivity extends AppCompatActivity {
 
                 //Complete and destroy login activity once successful
 
-                finish();
+                //finish();
             }
         });
 
@@ -129,7 +132,7 @@ public class LoginActivity extends AppCompatActivity {
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(final View v) {
                 loadingProgressBar.setVisibility(View.VISIBLE);
                 loginViewModel.login(usernameEditText.getText().toString(),
                         passwordEditText.getText().toString());
@@ -138,8 +141,14 @@ public class LoginActivity extends AppCompatActivity {
                         new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
-                                textView.setText(response.toString());
-                                Toast.makeText(getApplicationContext(), response, Toast.LENGTH_LONG).show();
+                                res = response.toString();
+                                int resultado = res.indexOf("true");
+                                if(resultado !=-1){
+                                    sendMessage(v);
+                                }else {
+                                    Toast.makeText(getApplicationContext(), response, Toast.LENGTH_LONG).show();
+                                    finish();
+                                }
                             }
                         }, new Response.ErrorListener() {
                     @Override
@@ -168,5 +177,10 @@ public class LoginActivity extends AppCompatActivity {
 
     private void showLoginFailed(@StringRes Integer errorString) {
         Toast.makeText(getApplicationContext(), errorString, Toast.LENGTH_SHORT).show();
+    }
+    public void sendMessage(View view) {
+        Intent intent = new Intent(this, DisplayMessageActivity.class);
+        intent.putExtra(RESPONSE, res);
+        startActivity(intent);
     }
 }

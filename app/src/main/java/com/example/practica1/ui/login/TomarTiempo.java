@@ -71,13 +71,15 @@ public class TomarTiempo extends AppCompatActivity {
         terminar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               ejercicio = 1;
-               textView.setText("Hazlo!");
-               textView2.setText("00:00");
-               a.cancel();
-               b.cancel();
-               esta=false;
-               wakeLock.release();
+               if(esta) {
+                   ejercicio = 1;
+                   textView.setText("Hazlo!");
+                   textView2.setText("00:00");
+                   if(a!= null){a.cancel();}
+                   if(b!=null){b.cancel();}
+                   esta = false;
+                   wakeLock.release();
+               }
             }
         });
 
